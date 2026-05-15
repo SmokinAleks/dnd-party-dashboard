@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +34,7 @@ body {
     radial-gradient(circle at 80% 100%, rgba(160,44,44,0.06), transparent 50%),
     var(--bg);
   background-attachment: fixed;
-  padding-bottom: 8rem;   /* Platz für Sticky Würfel-Panel */
+  padding-bottom: 8rem;   /* room for the sticky dice panel */
 }
 
 h1, h2, h3, .serif {
@@ -368,7 +368,7 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
 
 .card.error { padding: 1rem; color: var(--crimson-bright); border-color: var(--crimson); }
 
-/* ─── DICE PANEL (Spieler) ─── */
+/* ─── DICE PANEL (player) ─── */
 .dice-panel {
   position: fixed; bottom: 0; left: 0; right: 0;
   background: linear-gradient(180deg, rgba(18,13,10,0.96), rgba(18,13,10,1));
@@ -411,7 +411,7 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
   box-shadow: 0 0 12px rgba(214,56,56,0.5);
 }
 
-/* ─── Rechtsklick-Kontextmenü (Adv/Dis) ─── */
+/* ─── Right-click context menu (adv/dis) ─── */
 .roll-context-menu {
   position: fixed; z-index: 500;
   background: var(--bg-card); border: 1px solid var(--gold);
@@ -578,7 +578,7 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
   font-family: monospace; font-size: 0.85rem;
 }
 
-/* ─── ROLL TOAST (Würfel-Animation) ─── */
+/* ─── ROLL TOAST (dice animation) ─── */
 #rollToastContainer {
   position: fixed; top: 18%; left: 50%;
   transform: translateX(-50%);
@@ -789,41 +789,41 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
   </div>
   <div class="topbar-actions">
     <span class="meta"><span id="liveDot" class="live-dot"></span><span id="lastUpdate">—</span></span>
-    <button id="refreshBtn">↻ Aktualisieren</button>
+    <button id="refreshBtn">↻ Refresh</button>
     <select id="identitySelect" class="identity-select">
-      <option value="">— Identität wählen —</option>
+      <option value="">— Choose identity —</option>
     </select>
   </div>
 </header>
 
 <div id="grid" class="grid">
-  <div class="status"><span class="spinner"></span>Lade Charaktere…</div>
+  <div class="status"><span class="spinner"></span>Loading characters…</div>
 </div>
 
 <section id="partyOverview" class="party-overview"></section>
 
-<!-- Spieler-Würfel-Panel (sticky bottom) -->
+<!-- Player dice panel (sticky bottom) -->
 <div id="dicePanel" class="dice-panel">
   <div class="dice-panel-inner">
     <div class="dice-panel-label">
-      🎲 Würfeln
-      <small>verdeckt — nur der DM sieht dein Ergebnis</small>
+      🎲 Roll dice
+      <small>hidden — only the DM sees your result</small>
     </div>
     <div class="dice-set" id="diceSet"></div>
-    <button id="deathSaveBtn" class="die-btn death-save" title="Death Saving Throw — 1d20, 10+ ist Erfolg">💀 Death Save</button>
+    <button id="deathSaveBtn" class="die-btn death-save" title="Death Saving Throw — 1d20, 10+ is a success">💀 Death Save</button>
     <div class="dice-custom">
-      <input type="text" id="customExpr" placeholder='z.B. 2d6+3 oder 1d20-1' maxlength="40">
-      <button id="customRollBtn" class="primary">Werfen</button>
+      <input type="text" id="customExpr" placeholder='e.g. 2d6+3 or 1d20-1' maxlength="40">
+      <button id="customRollBtn" class="primary">Roll</button>
     </div>
-    <div class="dice-status" id="diceStatus">noch nicht gewürfelt</div>
+    <div class="dice-status" id="diceStatus">no rolls yet</div>
   </div>
 </div>
 
 <!-- DM-Sidebar -->
 <aside id="dmSidebar" class="dm-sidebar">
   <div class="dm-sidebar-header">
-    <h2>🎩 DM-Würfellog</h2>
-    <button id="dmClearBtn" title="Würfellog leeren">✕ Leeren</button>
+    <h2>🎩 DM roll log</h2>
+    <button id="dmClearBtn" title="Clear roll log">✕ Clear</button>
   </div>
   <div class="dm-toolbar">
     <span style="color:var(--text-faint);font-size:.7rem;letter-spacing:1px;text-transform:uppercase;align-self:center;margin-right:.3rem">DM-eigen:</span>
@@ -838,7 +838,7 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
     <button id="dmCustomRollBtn" class="primary">⚂</button>
   </div>
   <div class="dm-rolls" id="dmRolls">
-    <div class="dm-empty">Noch keine Würfe.</div>
+    <div class="dm-empty">No rolls yet.</div>
   </div>
 </aside>
 
@@ -868,8 +868,8 @@ let STORAGE_IDENTITY = "party:identity";  // localStorage key, overwritten at bo
 const REFRESH_INTERVAL_MS = 60_000;
 const STALE_AFTER_MS      = 180_000;
 const ROLL_POLL_MS        = 2_000;
-// (Kein localStorage-Cursor mehr für Rolls — Server ist die Single Source of Truth.
-//  Beim Öffnen der DM-Sidebar wird das volle Log frisch geladen.)
+// (No localStorage cursor for rolls — the server is the single source of truth.
+//  Opening the DM sidebar reloads the full log fresh.)
 
 let characters = [];
 let lastSuccessAt = 0;
@@ -878,7 +878,7 @@ let inFlight = false;
 let identity = null;          // {id: <number|"dm">, name, type}
 let dmLastSeenRollId = 0;
 let dmPollTimer = null;
-const expandedIds = new Set();   // welche Karten der User aufgeklappt hat (überlebt Auto-Refresh)
+const expandedIds = new Set();   // cards the user has expanded (survives auto-refresh)
 
 // ─── Helpers ───
 function el(tag, opts, ...children) {
@@ -924,14 +924,14 @@ async function loadAll() {
   inFlight = true;
   const grid = document.getElementById("grid");
   if (!characters.length) {
-    grid.innerHTML = `<div class="status"><span class="spinner"></span>Lade ${GROUP_NAME}…</div>`;
+    grid.innerHTML = `<div class="status"><span class="spinner"></span>Loading ${GROUP_NAME}…</div>`;
   }
   try {
     const groups = await fetchJSON("api/groups/json");
     const g = groups.find(x => x.name === GROUP);
     const ids = (g && Array.isArray(g.members)) ? g.members : [];
     if (!ids.length) {
-      throw new Error("Keine Charaktere konfiguriert. Bitte 'character_ids' in config.php setzen.");
+      throw new Error("No characters configured. Please set 'character_ids' in config.php.");
     }
 
     const results = await Promise.all(ids.map(async id => {
@@ -948,8 +948,8 @@ async function loadAll() {
     if (!characters.length) {
       grid.innerHTML =
         `<div class="status error">⚠ ${e.message}<br>` +
-        `<small style="color:var(--text-faint)">Server-Backend (<code>api.php</code>) erreichbar? ` +
-        `<code>config.php</code> vorhanden und korrekt?</small></div>`;
+        `<small style="color:var(--text-faint)">Server backend (<code>api.php</code>) reachable? ` +
+        `Does <code>config.php</code> exist and is it valid?</small></div>`;
     }
   } finally {
     inFlight = false;
@@ -969,7 +969,7 @@ function classLine(c) {
 function render() {
   const grid = document.getElementById("grid");
   if (!characters.length) {
-    grid.innerHTML = '<div class="status error">Keine Charaktere geladen.</div>';
+    grid.innerHTML = '<div class="status error">No characters loaded.</div>';
     return;
   }
   const myId = identity && identity.type === "char" ? identity.id : null;
@@ -1010,7 +1010,7 @@ function renderPartyOverview() {
   ];
 
   ov.innerHTML = "";
-  ov.appendChild(el("h2", { text: `⚔ Gruppen-Übersicht (${GROUP_NAME})` }));
+  ov.appendChild(el("h2", { text: `⚔ Party overview (${GROUP_NAME})` }));
 
   // Stats
   for (const [k, name, short] of statKeys) {
@@ -1072,7 +1072,7 @@ function renderPartyOverview() {
   const langs = new Set();
   for (const c of visible) (c.languages || []).forEach(l => langs.add(l));
 
-  // Helper: Items aggregieren über alle Charaktere (Source: 'magicItems' oder 'partyItems')
+  // Helper: aggregate items across all characters (source: 'magicItems' or 'partyItems')
   const aggregateItems = (sourceKey) => {
     const items = {};
     for (const c of visible) {
@@ -1124,7 +1124,7 @@ function renderPartyOverview() {
   if (magicEntries.length) {
     ov.appendChild(el("div", { class: "ov-card party-inventory ov-magic" },
       el("div", { class: "ov-title", text: "Magic Items" }),
-      el("div", { class: "ov-sub",   text: `${magicEntries.length} persönliche Magic Items · ⚡ = attuned` }),
+      el("div", { class: "ov-sub",   text: `${magicEntries.length} personal magic items · ⚡ = attuned` }),
       buildItemList(magicEntries)
     ));
   }
@@ -1151,17 +1151,17 @@ function renderPartyOverview() {
 function buildCard(c) {
   if (c._error) {
     return el("div", { class: "card error" },
-      el("div", null, `Charakter ${c.id} konnte nicht geladen werden.`),
+      el("div", null, `Character ${c.id} could not be loaded.`),
       el("small", null, c._error)
     );
   }
   if (isPrivate(c)) {
     return el("div", { class: "card private" },
       el("div", { class: "private-icon", text: "🔒" }),
-      el("h3", { text: "Privater Charakter" }),
+      el("h3", { text: "Private character" }),
       el("p", { html:
-        `D&D-Beyond-ID <code>${c.id}</code> ist auf <em>private</em> gestellt.<br>` +
-        `Spieler bitte unter <strong>D&D Beyond → Charakter → Privacy</strong> auf <strong>Public</strong> umstellen.`
+        `D&D Beyond ID <code>${c.id}</code> is set to <em>private</em>.<br>` +
+        `Player, please switch it to <strong>Public</strong> under <strong>D&D Beyond → Character → Privacy</strong>.`
       })
     );
   }
@@ -1192,7 +1192,7 @@ function buildCard(c) {
             href: `https://www.dndbeyond.com/characters/${c.id}`,
             target: "_blank",
             rel: "noopener noreferrer",
-            title: "Auf D&D Beyond öffnen"
+            title: "Open on D&D Beyond"
           },
           text: c.characterName
         })
@@ -1206,7 +1206,7 @@ function buildCard(c) {
     ),
     el("div", {
       class: "inspired-badge" + (c.inspired ? " on" : ""),
-      attrs: { title: c.inspired ? "Inspiration aktiv" : "Keine Inspiration" },
+      attrs: { title: c.inspired ? "Inspiration active" : "No inspiration" },
       text: "★"
     })
   );
@@ -1236,7 +1236,7 @@ function buildCard(c) {
   );
   if (isMe) {
     initVital.style.cursor = "pointer";
-    initVital.title = "Initiative würfeln (1d20" + formatMod(dexMod) + ") · Rechtsklick: Vorteil/Nachteil";
+    initVital.title = "Roll initiative (1d20" + formatMod(dexMod) + ") · Right-click: advantage/disadvantage";
     const initRoll = `1d20${formatMod(dexMod)}`;
     const initLabel = `${c.characterName}: Initiative`;
     initVital.addEventListener("click", () => sendRoll(initRoll, initLabel));
@@ -1277,7 +1277,7 @@ function buildCard(c) {
     if (isMe) {
       const rollExpr  = `1d20${formatMod(s.diceModifier)}`;
       const rollLabel = `${c.characterName}: ${s.name}`;
-      statEl.title = `${s.name} würfeln (${rollExpr}) · Rechtsklick: Vorteil/Nachteil`;
+      statEl.title = `Roll ${s.name} (${rollExpr}) · Right-click: advantage/disadvantage`;
       statEl.addEventListener("click", () => sendRoll(rollExpr, rollLabel));
       attachAdvDisHandler(statEl, rollExpr, rollLabel);
     }
@@ -1298,7 +1298,7 @@ function buildCard(c) {
     if (isMe) {
       const rollExpr  = `1d20${formatMod(s.diceModifier)}`;
       const rollLabel = `${c.characterName}: ${s.name}`;
-      skillEl.title = `${s.name} würfeln (${rollExpr}) · Rechtsklick: Vorteil/Nachteil`;
+      skillEl.title = `Roll ${s.name} (${rollExpr}) · Right-click: advantage/disadvantage`;
       skillEl.addEventListener("click", () => sendRoll(rollExpr, rollLabel));
       attachAdvDisHandler(skillEl, rollExpr, rollLabel);
     }
@@ -1314,7 +1314,7 @@ function buildCard(c) {
     for (let i = 0; i < max; i++) {
       charges.appendChild(el("span", {
         class: "lim-charge" + (i < used ? " used" : ""),
-        attrs: { title: i < used ? "verbraucht" : "verfügbar" }
+        attrs: { title: i < used ? "used" : "available" }
       }));
     }
     limList.appendChild(el("div", { class: "lim-action" },
@@ -1345,31 +1345,31 @@ function buildCard(c) {
   // Expandable
   const expandContent = el("div", { class: "expand-content" });
   expandContent.appendChild(el("div", { class: "section-title", text:
-    isMe ? "Skills (klicken zum Würfeln)" : "Skills"
+    isMe ? "Skills (click to roll)" : "Skills"
   }));
   expandContent.appendChild(skillGrid);
   if (limList.children.length) {
     const t = el("div", { class: "section-title", style: "margin-top:1rem" });
-    t.textContent = "Aktionen mit Verbrauch";
+    t.textContent = "Limited-use actions";
     expandContent.appendChild(t);
     expandContent.appendChild(limList);
   }
   if (coins.children.length) {
     const t = el("div", { class: "section-title", style: "margin-top:1rem" });
-    t.textContent = "Münzen";
+    t.textContent = "Coins";
     expandContent.appendChild(t);
     expandContent.appendChild(coins);
   }
 
-  const expandBtn = el("button", { class: "expand-toggle", text: "▾ Skills, Aktionen, Münzen" });
+  const expandBtn = el("button", { class: "expand-toggle", text: "▾ Skills, actions, coins" });
   // Zustand vom letzten Render wiederherstellen
   if (expandedIds.has(c.id)) {
     expandContent.classList.add("open");
-    expandBtn.textContent = "▴ Schließen";
+    expandBtn.textContent = "▴ Collapse";
   }
   expandBtn.addEventListener("click", () => {
     const open = expandContent.classList.toggle("open");
-    expandBtn.textContent = open ? "▴ Schließen" : "▾ Skills, Aktionen, Münzen";
+    expandBtn.textContent = open ? "▴ Collapse" : "▾ Skills, actions, coins";
     if (open) expandedIds.add(c.id);
     else expandedIds.delete(c.id);
   });
@@ -1398,13 +1398,13 @@ function buildCard(c) {
 function rebuildIdentityOptions() {
   const sel = document.getElementById("identitySelect");
   const cur = identity ? (identity.type === "dm" ? "dm" : String(identity.id)) : "";
-  sel.innerHTML = '<option value="">— Identität wählen —</option>';
+  sel.innerHTML = '<option value="">— Choose identity —</option>';
   for (const c of characters) {
     if (c._error) continue;
     const opt = document.createElement("option");
     if (isPrivate(c)) {
       opt.value = String(c.id);
-      opt.textContent = `🔒 Privater Charakter (${c.id})`;
+      opt.textContent = `🔒 Private character (${c.id})`;
     } else {
       opt.value = String(c.id);
       opt.textContent = c.characterName;
@@ -1423,7 +1423,7 @@ async function applyIdentity(value) {
     identity = null;
     localStorage.removeItem(STORAGE_IDENTITY);
   } else if (value === "dm") {
-    // DM-Auth prüfen — ohne Cookie kein DM-Modus
+    // Verify DM auth — without the cookie, no DM mode.
     let isDm = false;
     try {
       const r = await fetch("api/dm/check", { credentials: "same-origin", cache: "no-cache" });
@@ -1431,7 +1431,7 @@ async function applyIdentity(value) {
       isDm = !!j.is_dm;
     } catch {}
     if (!isDm) {
-      alert("🔒 DM-Anmeldung erforderlich.\n\nDu hast noch keinen DM-Login-Cookie in diesem Browser. Bitte den Claim-Link verwenden, den du vom Spieler bekommen hast.");
+      alert("🔒 DM login required.\n\nNo DM cookie set in this browser yet. Please use the claim link a player generated for you.");
       document.getElementById("identitySelect").value = identity
         ? (identity.type === "dm" ? "dm" : String(identity.id))
         : "";
@@ -1476,10 +1476,10 @@ function updateUiForIdentity() {
   }
 }
 
-// ─── Adv/Dis Kontextmenü (Rechtsklick) ───
+// ─── Adv/Dis context menu (right-click) ───
 function attachAdvDisHandler(elem, baseRoll, baseLabel) {
   elem.addEventListener("contextmenu", (e) => {
-    // Nur sinnvoll wenn die Roll-Expression d20 enthält
+    // Only meaningful if the roll expression contains d20
     if (!/(^|\+)1d20([+-]\d+)?$/.test(baseRoll)) return;
     e.preventDefault();
     showAdvDisMenu(e.clientX, e.clientY, baseRoll, baseLabel);
@@ -1490,10 +1490,10 @@ function showAdvDisMenu(x, y, baseRoll, baseLabel) {
   const advRoll = baseRoll.replace(/(^|\+)1d20/, "$12d20kh1");
   const disRoll = baseRoll.replace(/(^|\+)1d20/, "$12d20kl1");
   const menu = el("div", { class: "roll-context-menu", attrs: { id: "rollContextMenu" } },
-    el("div", { class: "menu-hint", text: "Wahl für diesen Wurf" }),
-    el("button", { class: "menu-item adv", text: "🟢 Mit Vorteil",
+    el("div", { class: "menu-hint", text: "Choice for this roll" }),
+    el("button", { class: "menu-item adv", text: "🟢 With advantage",
       on: { click: () => { menu.remove(); sendRoll(advRoll, "ADV — " + baseLabel); } } }),
-    el("button", { class: "menu-item dis", text: "🔴 Mit Nachteil",
+    el("button", { class: "menu-item dis", text: "🔴 With disadvantage",
       on: { click: () => { menu.remove(); sendRoll(disRoll, "DIS — " + baseLabel); } } }),
     el("button", { class: "menu-item", text: "⚪ Normal",
       on: { click: () => { menu.remove(); sendRoll(baseRoll, baseLabel); } } })
@@ -1513,7 +1513,7 @@ function showAdvDisMenu(x, y, baseRoll, baseLabel) {
   }, 50);
 }
 
-// ─── Würfeln ───
+// ─── Rolling ───
 function showRollToast(expression, label) {
   let container = document.getElementById("rollToastContainer");
   if (!container) {
@@ -1551,7 +1551,7 @@ function dismissToast(toast, klass) {
 }
 
 async function sendRoll(expression, label) {
-  if (!identity) { alert("Bitte erst eine Identität oben rechts wählen."); return; }
+  if (!identity) { alert("Please pick an identity in the top right first."); return; }
   const toast = showRollToast(expression, label);
   const status = document.getElementById("diceStatus");
   if (status && identity.type !== "dm") {
@@ -1578,7 +1578,7 @@ async function sendRoll(expression, label) {
   } catch (e) {
     dismissToast(toast, "error");
     if (status && identity.type !== "dm") {
-      status.textContent = `✗ Fehler: ${e.message}`;
+      status.textContent = `✗ Error: ${e.message}`;
       status.classList.remove("flash");
     } else {
       alert("Wurf fehlgeschlagen: " + e.message);
@@ -1592,7 +1592,7 @@ function startDmPoll() {
   // Frischstart: Sidebar leeren, kompletten Server-Stand holen.
   dmLastSeenRollId = 0;
   const list = document.getElementById("dmRolls");
-  if (list) list.innerHTML = '<div class="dm-empty">Lade Würfellog…</div>';
+  if (list) list.innerHTML = '<div class="dm-empty">Loading roll log…</div>';
   pollDmRolls();
   dmPollTimer = setInterval(pollDmRolls, ROLL_POLL_MS);
 }
@@ -1605,13 +1605,13 @@ async function pollDmRolls() {
   try {
     const r = await fetchJSON(`api/rolls?since=${dmLastSeenRollId}`);
     if (r.auth_required) {
-      // Server sagt: kein gültiger DM-Cookie mehr — zurücksetzen
+      // Server says: DM cookie no longer valid — reset identity.
       stopDmPoll();
       identity = null;
       localStorage.removeItem(STORAGE_IDENTITY);
       document.getElementById("identitySelect").value = "";
       updateUiForIdentity();
-      alert("DM-Sitzung abgelaufen. Bitte neu anmelden.");
+      alert("DM session expired. Please log in again.");
       return;
     }
     if (r.rolls && r.rolls.length) {
@@ -1622,7 +1622,7 @@ async function pollDmRolls() {
     } else if (dmLastSeenRollId === 0) {
       const list = document.getElementById("dmRolls");
       const empty = list && list.querySelector(".dm-empty");
-      if (empty) empty.textContent = "Noch keine Würfe.";
+      if (empty) empty.textContent = "No rolls yet.";
     }
   } catch (e) {
     console.warn("[dashboard] poll failed:", e);
@@ -1676,7 +1676,7 @@ setInterval(() => {
   });
 }, 5000);
 
-// ─── Live-Indikator (Charakter-Daten) ───
+// ─── Live indicator (character data freshness) ───
 function updateLiveIndicator() {
   const el = document.getElementById("lastUpdate");
   const dot = document.getElementById("liveDot");
@@ -1686,7 +1686,7 @@ function updateLiveIndicator() {
   dot.classList.toggle("stale", ageS * 1000 > STALE_AFTER_MS);
 }
 
-// ─── Würfel-Buttons in Spieler-Panel aufbauen ───
+// ─── Build dice buttons in the player panel ───
 (function buildDiceSet() {
   const wrap = document.getElementById("diceSet");
   for (const sides of [4, 6, 8, 10, 12, 20, 100]) {
@@ -1698,14 +1698,14 @@ function updateLiveIndicator() {
       on: { click: () => sendRoll(expr, lbl) }
     });
     if (sides === 20) {
-      b.title = "1d20 · Rechtsklick: Vorteil/Nachteil";
+      b.title = "1d20 · Right-click: advantage/disadvantage";
       attachAdvDisHandler(b, expr, lbl);
     }
     wrap.appendChild(b);
   }
 })();
 
-// Death Saving Throw — 1d20, kein Mod (10+ ist Erfolg in D&D 5e)
+// Death Saving Throw — 1d20, no mod (10+ is a success in D&D 5e)
 document.getElementById("deathSaveBtn").addEventListener("click", () =>
   sendRoll("1d20", "💀 Death Saving Throw")
 );
@@ -1715,7 +1715,7 @@ attachAdvDisHandler(
   "💀 Death Saving Throw"
 );
 
-// ─── DM-Toolbar Würfel ───
+// ─── DM toolbar dice ───
 document.querySelectorAll("[data-dm-roll]").forEach(b => {
   b.addEventListener("click", () => sendRoll(b.dataset.dmRoll, `DM: 1d${b.textContent.replace('d','')}`));
 });
@@ -1732,17 +1732,17 @@ document.getElementById("dmCustomExpr").addEventListener("keydown", e => {
 });
 
 document.getElementById("dmClearBtn").addEventListener("click", async () => {
-  if (!confirm("Würfellog komplett leeren?")) return;
+  if (!confirm("Clear the entire roll log?")) return;
   try {
     await fetchJSON("api/rolls/clear", { method: "POST" });
     document.getElementById("dmRolls").innerHTML = '<div class="dm-empty">Log geleert.</div>';
     dmLastSeenRollId = 0;
   } catch (e) {
-    alert("Fehler beim Leeren: " + e.message);
+    alert("Error clearing log: " + e.message);
   }
 });
 
-// ─── Spieler Custom-Wurf ───
+// ─── Player custom roll ───
 document.getElementById("customRollBtn").addEventListener("click", () => {
   const input = document.getElementById("customExpr");
   const expr = input.value.trim();
@@ -1772,14 +1772,14 @@ window.addEventListener("resize", updateUiForIdentity);
 function renderDmSetupPage() {
   document.body.innerHTML = `
     <div class="setup-page">
-      <h1>🎩 DM-Login generieren</h1>
-      <p>Ein Klick erzeugt einen Einmal-Login-Link. Schick die URL deinem DM
-      (z. B. per Signal oder WhatsApp). Wenn er sie öffnet, wird er in
-      <em>seinem</em> Browser dauerhaft als DM erkannt.</p>
+      <h1>🎩 Generate DM login</h1>
+      <p>One click creates a single-use login link. Send the URL to your DM
+      (e.g. via Signal or WhatsApp). When they open it, <em>their</em> browser
+      is permanently recognised as DM.</p>
       <p style="color:var(--text-faint);font-size:.85rem">
-      Du selbst wirst durch das Anklicken <strong>nicht</strong> zum DM —
-      der Token wird beim ersten Aufruf "verbraucht".</p>
-      <button id="genBtn" class="primary">🔑 Neuen DM-Login generieren</button>
+      Opening the link in <strong>your</strong> browser does not make you DM —
+      the token is consumed on first use.</p>
+      <button id="genBtn" class="primary">🔑 Generate new DM login</button>
       <div id="setupResult"></div>
     </div>`;
   document.getElementById("genBtn").addEventListener("click", async () => {
@@ -1789,19 +1789,19 @@ function renderDmSetupPage() {
       if (!j.ok) throw new Error(j.error || "?");
       const result = document.getElementById("setupResult");
       result.innerHTML = `
-        <p style="margin-top:1rem"><strong>Link bereit — schick ihn dem DM:</strong></p>
+        <p style="margin-top:1rem"><strong>Link ready — send it to your DM:</strong></p>
         <input id="urlField" type="text" readonly value="${j.url}">
-        <button id="copyBtn" class="primary">📋 Kopieren</button>
+        <button id="copyBtn" class="primary">📋 Copy</button>
         <p style="color:var(--text-faint);font-size:.8rem;margin-top:1rem">
-        Gültig 7 Tage, danach läuft der Link ab. Wenn die URL in falsche Hände gerät,
-        einfach einen neuen generieren — der alte wird invalidiert sobald jemand draufklickt.</p>`;
+        Valid for 7 days, then it expires. If the URL leaks, just generate a new one —
+        the old one is invalidated the moment anyone clicks it.</p>`;
       document.getElementById("copyBtn").onclick = () => {
         const f = document.getElementById("urlField");
         f.select(); document.execCommand("copy");
-        document.getElementById("copyBtn").textContent = "✓ Kopiert";
+        document.getElementById("copyBtn").textContent = "✓ Copied";
       };
     } catch (e) {
-      alert("Fehler: " + e.message);
+      alert("Error: " + e.message);
     }
   });
 }
@@ -1818,10 +1818,10 @@ async function loadConfig() {
     CONFIG = await fetchJSON("api/config/json");
   } catch (e) {
     document.getElementById("grid").innerHTML =
-      `<div class="status error">⚠ Konnte Konfiguration nicht laden.<br>` +
+      `<div class="status error">⚠ Could not load configuration.<br>` +
       `<small style="color:var(--text-faint)">${e.message}<br>` +
-      `Liegt <code>config.php</code> neben <code>api.php</code>? ` +
-      `(Vorlage: <code>config.example.php</code> kopieren und anpassen.)</small></div>`;
+      `Is <code>config.php</code> sitting next to <code>api.php</code>? ` +
+      `(Template: copy <code>config.example.php</code> and edit it.)</small></div>`;
     throw e;
   }
   GROUP            = CONFIG.group_slug || "party";
@@ -1844,7 +1844,7 @@ async function loadConfig() {
 (async function boot() {
   const url = new URL(window.location.href);
 
-  // ?dm-claim=XXX → Token einlösen, Cookie setzen, dann zum Dashboard
+  // ?dm-claim=XXX → redeem token, set cookie, then go to dashboard
   if (url.searchParams.has("dm-claim")) {
     const token = url.searchParams.get("dm-claim");
     try {
@@ -1852,18 +1852,18 @@ async function loadConfig() {
                             { method: "POST", credentials: "same-origin" });
       const j = await r.json();
       if (j.ok) {
-        alert("✓ Erfolgreich als DM angemeldet. Du wirst zum Dashboard weitergeleitet.");
+        alert("✓ Successfully logged in as DM. Redirecting to the dashboard.");
       } else {
-        alert("✗ Anmeldung fehlgeschlagen: " + (j.error || "Token ungültig"));
+        alert("✗ Login failed: " + (j.error || "Invalid token"));
       }
     } catch (e) {
-      alert("Fehler beim Einlösen: " + e.message);
+      alert("Error redeeming token: " + e.message);
     }
     window.location.replace("./");
     return;
   }
 
-  // ?dm-setup → Setup-Seite (Spieler erzeugt Claim-Link)
+  // ?dm-setup → setup page (player generates a claim link)
   if (url.searchParams.has("dm-setup")) {
     renderDmSetupPage();
     return;

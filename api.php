@@ -174,7 +174,7 @@ try {
         $token = trim((string)($_GET['token'] ?? ''));
         if ($token === '') json_response(400, ['error' => 'token fehlt']);
         if (!dm_claim_token($token)) {
-            json_response(400, ['error' => 'Token ungültig oder bereits verwendet']);
+            json_response(400, ['error' => 'Token invalid or already used']);
         }
         json_response(200, ['ok' => true]);
 
@@ -197,7 +197,7 @@ try {
 
 /**
  * Holt Charakter von D&D Beyond und konvertiert ins Dashboard-Format.
- * Bei "private" gibt es ein Privacy-Stub zurück, das vom Frontend als
+ * For "private" characters returns a privacy stub that the frontend
  * "🔒 Privater Charakter" Karte gerendert wird (selbe Logik wie zuvor).
  */
 function fetch_dndb_character(int $id): array {
@@ -253,7 +253,7 @@ function adapt_dndb(array $d): array {
 
     // Map: item-definition-id → {equipped, attuned, requiresAttunement}
     // Wird gebraucht, um Item-Modifier zu filtern: Boni gelten nur, wenn das
-    // zugehörige Item equipped UND (nicht-magisch ODER attuned) ist.
+    // the matching item is equipped AND (non-magical OR attuned).
     $itemStatus = [];
     foreach ($d['inventory'] ?? [] as $it) {
         $df = $it['definition'] ?? [];
@@ -286,7 +286,7 @@ function adapt_dndb(array $d): array {
     foreach ($d['overrideStats'] ?? [] as $s) $ovr[$s['id']] = $s['value'];
 
     $statBonus = [1=>0,2=>0,3=>0,4=>0,5=>0,6=>0];
-    $statSet   = [];   // sid → höchster set-Wert (z.B. Amulet of Health setzt CON auf 19)
+    $statSet   = [];   // sid → highest "set" value (e.g. Amulet of Health sets CON to 19)
     foreach ($allMods as $m) {
         $sub = $m['subType'] ?? '';
         $val = $m['value'] ?? null;
@@ -309,7 +309,7 @@ function adapt_dndb(array $d): array {
         if ($o !== null) {
             $total = (int)$o;                                      // Override hat Vorrang
         } elseif (isset($statSet[$sid])) {
-            $total = max($statSet[$sid], $sumStat);                // set: nur wenn höher als sum
+            $total = max($statSet[$sid], $sumStat);                // "set" only wins if higher than sum
         } else {
             $total = $sumStat;
         }
@@ -349,7 +349,7 @@ function adapt_dndb(array $d): array {
     //   3) + Schild
     //   4) + bonus/unarmored-armor-class (nur wenn unarmored)
     //   5) + bonus/armor-class (immer)
-    //   6) AC_OVERRIDES (falls für diese Char-ID gesetzt)
+    //   6) AC_OVERRIDES (if set for this character ID)
     $dexMod = $stats['dexterity']['diceModifier'];
     $hasBodyArmor = false;
     $hasShield    = false;
@@ -360,7 +360,7 @@ function adapt_dndb(array $d): array {
         $df  = $it['definition'] ?? [];
         $ati = $df['armorTypeId'] ?? null;
         $av  = $df['armorClass']  ?? null;
-        if ($ati === 4) {                              // Schild (zählt später)
+        if ($ati === 4) {                              // shield (counted later)
             $hasShield = true;
         } elseif ($ati === 1 && $av !== null) {        // Light
             $ac = (int)$av + $dexMod;
@@ -393,7 +393,7 @@ function adapt_dndb(array $d): array {
         }
         $ac = $bestUnarmored;
 
-        // Boni die NUR bei unarmored zählen (z.B. Bracers of Defense)
+        // Bonuses that ONLY apply when unarmored (e.g. Bracers of Defense)
         foreach ($allMods as $m) {
             if (($m['type'] ?? '') === 'bonus'
                 && ($m['subType'] ?? '') === 'unarmored-armor-class'
@@ -498,7 +498,7 @@ function adapt_dndb(array $d): array {
     // ─── Walking Speed ───
     // Reihenfolge:
     //   1) customSpeeds (manueller Override im Character Sheet, movementId=1)
-    //   2) race.weightSpeeds.override.walk (komplett-Override über Customize)
+    //   2) race.weightSpeeds.override.walk (full override via Customize)
     //   3) race.weightSpeeds.normal.walk + alle relevanten Bonus-Modifier
     $walkSpeed = null;
     foreach (($d['customSpeeds'] ?? []) as $cs) {
@@ -586,7 +586,7 @@ function adapt_dndb(array $d): array {
 
     // Items mit Charges — nur wenn ATTUNED.
     // (Potions / Items ohne Attunement-Slot werden nicht gelistet — sonst
-    //  würde jeder Trank im Rucksack die Übersicht aufblähen.)
+    //  every potion in the backpack would bloat the overview otherwise.)
     foreach (($d['inventory'] ?? []) as $it) {
         $lu = $it['limitedUse'] ?? null;
         if (!$lu) continue;
@@ -596,7 +596,7 @@ function adapt_dndb(array $d): array {
     }
 
     // (Einzel-Spells mit limitedUse — z.B. Magic Initiate's Mage Armor 1/Tag —
-    //  werden bewusst NICHT gelistet. Übersicht der Slot-Pools reicht.)
+    //  are deliberately NOT listed — the slot-pool overview is enough.)
 
     // Spell Slots aus Multiclass-Tabelle (max wird vom Frontend in DDB gerechnet,
     // ist nicht im JSON — wir berechnen es selbst)
@@ -614,15 +614,15 @@ function adapt_dndb(array $d): array {
     ];
 
     // Effective Caster Level aus Multiclass berechnen.
-    // WICHTIG: Klasse zählt nur, wenn sie tatsächlich Zauber wirken kann
-    // (z.B. Rogue hat divisor=3 für Arcane Trickster, aber Soulknife/Thief nicht!)
+    // IMPORTANT: a class only counts if it can actually cast spells
+    // (e.g. Rogue has divisor=3 for Arcane Trickster, but not for Soulknife/Thief!)
     $effCasterLvl = 0;
     foreach (($d['classes'] ?? []) as $c) {
         $cd  = $c['definition'] ?? [];
         $sub = $c['subclassDefinition'] ?? null;
         $classCasts = (bool)($cd['canCastSpells'] ?? false);
         $subCasts   = $sub ? (bool)($sub['canCastSpells'] ?? false) : false;
-        if (!$classCasts && !$subCasts) continue;   // diese Klasse zählt nicht
+        if (!$classCasts && !$subCasts) continue;   // this class doesn't contribute
 
         $div = ($cd['spellRules'] ?? [])['multiClassSpellSlotDivisor'] ?? null;
         if ($sub && isset($sub['spellRules']['multiClassSpellSlotDivisor'])) {
@@ -719,7 +719,7 @@ function adapt_dndb(array $d): array {
             $customItemNames[(string)$cv['valueId']] = (string)($cv['value'] ?? '');
         }
     }
-    // Container-Map: id → effektiver Name (kebab/lowercased für Matching)
+    // Container map: id → effective name (kebab/lowercased for matching)
     $containerKey = [];
     foreach (($d['inventory'] ?? []) as $it) {
         $df = $it['definition'] ?? [];
@@ -762,7 +762,7 @@ function adapt_dndb(array $d): array {
             $partyItems[] = $rec;
             continue;
         }
-        // Sonst: nur Magic Items in die persönliche Magic-Liste
+        // Otherwise: only magic items go into the personal magic list
         if (!$isMagic && !$canAtt) continue;
         if (!$canAtt && in_array($rarity, ['Common', 'Mundane'], true)) continue;
         $magicItems[] = $rec;
@@ -877,7 +877,7 @@ function http_get_json(string $url): ?array {
 
 function parse_and_roll(string $expr): array {
     $s = preg_replace('/\s+/', '', $expr) ?? '';
-    if ($s === '') throw new InvalidArgumentException('Leerer Würfelausdruck');
+    if ($s === '') throw new InvalidArgumentException('Empty dice expression');
     $s2 = str_replace('-', '+-', $s);
     if ($s2[0] === '+') $s2 = substr($s2, 1);
     $parts = array_filter(explode('+', $s2), static fn($p) => $p !== '');
@@ -892,10 +892,10 @@ function parse_and_roll(string $expr): array {
             $sides = (int)$m[3];
             $kt    = $m[4] ?? '';                         // 'kh' | 'kl' | ''
             $kn    = isset($m[5]) && $m[5] !== '' ? (int)$m[5] : 1;
-            if ($n < 1 || $n > 100) throw new InvalidArgumentException("Anzahl Würfel muss 1–100 sein: $p");
-            if ($sides < 2 || $sides > 1000) throw new InvalidArgumentException("Würfel-Seiten müssen 2–1000 sein: $p");
+            if ($n < 1 || $n > 100) throw new InvalidArgumentException("Dice count must be 1-100: $p");
+            if ($sides < 2 || $sides > 1000) throw new InvalidArgumentException("Die sides must be 2-1000: $p");
             if ($kt !== '' && ($kn < 1 || $kn > $n)) {
-                throw new InvalidArgumentException("Keep-Anzahl ungültig: $p");
+                throw new InvalidArgumentException("Invalid keep count: $p");
             }
             $sign = $neg ? -1 : 1;
             $values = [];
@@ -922,12 +922,12 @@ function parse_and_roll(string $expr): array {
                 'subtotal' => $sign * $sum,
             ];
         } else {
-            if (!preg_match('/^-?\d+$/', $p)) throw new InvalidArgumentException("Ungültiges Token: '$p'");
+            if (!preg_match('/^-?\d+$/', $p)) throw new InvalidArgumentException("Invalid token: '$p'");
             $flatModifier += (int)$p;
         }
     }
     if (empty($diceGroups) && $flatModifier === 0) {
-        throw new InvalidArgumentException('Mindestens ein Würfel oder Modifier nötig');
+        throw new InvalidArgumentException('At least one die or modifier required');
     }
     $total = $flatModifier;
     foreach ($diceGroups as $g) $total += $g['subtotal'];
@@ -941,7 +941,7 @@ function parse_and_roll(string $expr): array {
 
 function with_locked_state(callable $fn) {
     $fp = @fopen(ROLLS_FILE, 'c+');
-    if (!$fp) throw new RuntimeException('Kann ' . ROLLS_FILE . ' nicht öffnen — ist der Ordner für den Web-User schreibbar?');
+    if (!$fp) throw new RuntimeException('Cannot open ' . ROLLS_FILE . ' — is the folder writable by the web server user?');
     try {
         flock($fp, LOCK_EX);
         $content = '';
