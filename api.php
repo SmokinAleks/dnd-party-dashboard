@@ -872,7 +872,7 @@ function http_get_json(string $url): ?array {
 
 
 // ═══════════════════════════════════════════════════════════════════
-//  Würfel-Logik
+//  Dice logic
 // ═══════════════════════════════════════════════════════════════════
 
 function parse_and_roll(string $expr): array {
@@ -885,7 +885,7 @@ function parse_and_roll(string $expr): array {
     $diceGroups = [];
     $flatModifier = 0;
     foreach ($parts as $p) {
-        // NdM[(kh|kl)X]  → optionales "keep highest/lowest X" für Advantage/Disadvantage
+        // NdM[(kh|kl)X]  → optional "keep highest/lowest X" for advantage/disadvantage
         if (preg_match('/^(-?)(\d*)d(\d+)(?:(kh|kl)(\d*))?$/', $p, $m)) {
             $neg   = $m[1] === '-';
             $n     = $m[2] !== '' ? (int)$m[2] : 1;
@@ -901,7 +901,7 @@ function parse_and_roll(string $expr): array {
             $values = [];
             for ($i = 0; $i < $n; $i++) $values[] = random_int(1, $sides);
 
-            // welche Würfel-Indices zählen?
+            // which dice indices count?
             $kept = range(0, $n - 1);
             if ($kt === 'kh' || $kt === 'kl') {
                 $idx = array_keys($values);
@@ -909,7 +909,7 @@ function parse_and_roll(string $expr): array {
                     ? static fn($a, $b) => $values[$b] - $values[$a]
                     : static fn($a, $b) => $values[$a] - $values[$b]);
                 $kept = array_slice($idx, 0, $kn);
-                sort($kept);   // für stabile Anzeige
+                sort($kept);   // stable display order
             }
             $sum = 0;
             foreach ($kept as $i) $sum += $values[$i];
@@ -1051,7 +1051,7 @@ function dm_create_token(): string {
     $token = dm_generate_token();
     $state = dm_load_tokens();
     $state['pending'][] = ['token' => $token, 'created' => time()];
-    // pending Tokens älter als 7 Tage aufräumen
+    // sweep pending tokens older than 7 days
     $cutoff = time() - 7 * 24 * 3600;
     $state['pending'] = array_values(array_filter(
         $state['pending'],
@@ -1064,8 +1064,8 @@ function dm_create_token(): string {
 function dm_claim_token(string $token): bool {
     $state = dm_load_tokens();
 
-    // Bereits geclaimt? → Cookie nur erneuern (DM hat Cookies gelöscht
-    // oder neues Gerät mit gleichem Bookmark; URL bleibt re-usable)
+    // Already claimed? → just refresh the cookie (DM cleared their cookies
+    // or opened the same bookmark on a new device; URL stays reusable).
     foreach ($state['claimed'] as $c) {
         if (hash_equals((string)($c['token'] ?? ''), $token)) {
             dm_set_cookie($token);

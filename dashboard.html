@@ -52,6 +52,17 @@ h1, h2, h3, .serif {
   display: flex; align-items: center; justify-content: space-between;
   gap: 1rem; flex-wrap: wrap;
 }
+/* Centered slot in the topbar — used for the Ko-fi button.
+   Absolutely positioned so the title (left) and actions (right) keep
+   their natural sizes; on mobile (see media query) it drops to its own line. */
+.topbar-center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;        /* let clicks fall through empty space… */
+}
+.topbar-center > * { pointer-events: auto; }   /* …but not on the button itself */
 .topbar-title { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
 .topbar-title h1 {
   font-size: 1.5rem; color: var(--gold-bright);
@@ -773,6 +784,15 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
   .stats { grid-template-columns: repeat(3, 1fr); }
   .topbar { padding: 0.6rem 1rem; }
   .topbar-title h1 { font-size: 1.2rem; }
+  .topbar-center {
+    position: static;
+    transform: none;
+    order: 3;
+    flex-basis: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 0.4rem;
+  }
   .skill-grid { grid-template-columns: 1fr; }
   .dice-panel { padding: 0.6rem 1rem; }
   .dm-sidebar { width: 100vw; }
@@ -786,6 +806,12 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
   <div class="topbar-title">
     <h1 id="groupTitle">⚔ Party</h1>
     <span class="sub">Party Status Dashboard</span>
+  </div>
+  <div class="topbar-center">
+    <!-- href is set by loadConfig() only when a kofi_username is configured. -->
+    <a id="kofiLink" class="kofi-btn" target="_blank" rel="noopener" hidden>
+      ☕ Support on Ko-fi
+    </a>
   </div>
   <div class="topbar-actions">
     <span class="meta"><span id="liveDot" class="live-dot"></span><span id="lastUpdate">—</span></span>
@@ -847,11 +873,6 @@ select.identity-select option { background: var(--bg-card); color: var(--text); 
     D&amp;D Party Dashboard — open source on
     <a href="https://github.com/SmokinAleks/dnd-party-dashboard" target="_blank" rel="noopener" id="repoLink">GitHub</a>
   </span>
-  <!-- href is intentionally left blank — JS only sets it (and removes the
-       hidden attribute) when a kofi_username is configured. -->
-  <a id="kofiLink" class="kofi-btn" target="_blank" rel="noopener" hidden>
-    ☕ Support on Ko-fi
-  </a>
 </footer>
 
 <script>
