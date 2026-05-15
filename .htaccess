@@ -1,0 +1,32 @@
+# D&D Party Dashboard — Apache / Web Station config
+#
+# 1. Routes /api/* to api.php (front controller).
+# 2. Blocks direct access to roll log, DM token storage, and local config.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Never serve roll log or DM token file directly.
+    RewriteRule ^rolls\.dat$ - [F,L]
+    RewriteRule ^dm-tokens\.dat$ - [F,L]
+
+    # Route /api/<anything> to api.php, passing the original path as
+    # ?_path=... and preserving the rest of the query string (QSA).
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^api/(.*)$ api.php?_path=$1 [L,QSA]
+</IfModule>
+
+# Belt-and-braces: also block via <Files> in case mod_rewrite is disabled.
+<Files "rolls.dat">
+    Require all denied
+</Files>
+<Files "dm-tokens.dat">
+    Require all denied
+</Files>
+
+# Keep local config private even if the host ever fails to execute PHP
+# (would otherwise serve config.php as plain text, leaking character IDs).
+<Files "config.php">
+    Require all denied
+</Files>

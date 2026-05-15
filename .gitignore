@@ -1,0 +1,26 @@
+# ── Runtime data (never commit) ─────────────────────────────────────────
+# Roll log and DM auth tokens — created by api.php at runtime, contain
+# play-session data and must stay private. Protected from web access via
+# .htaccess in any case.
+rolls.dat
+dm-tokens.dat
+
+# ── Local configuration ─────────────────────────────────────────────────
+# Holds your D&D Beyond character IDs and other table-specific settings.
+# Self-hosters copy config.example.php → config.php and edit it locally.
+config.php
+
+# ── OS / editor cruft ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# ── Python dev artifacts (from server.py) ───────────────────────────────
+__pycache__/
+*.pyc
+
+# ── Claude Code / agent metadata ────────────────────────────────────────
+.claude/

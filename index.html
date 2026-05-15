@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>D&amp;D Party Dashboard — Redirecting…</title>
+<script>
+  // Forward to the dashboard while preserving query string and hash anchor
+  // (e.g. ?dm-setup or ?dm-claim=...).
+  window.location.replace(
+    "dashboard.html" + window.location.search + window.location.hash
+  );
+</script>
+<noscript>
+  <meta http-equiv="refresh" content="0; url=dashboard.html">
+</noscript>
+</head>
+<body>
+<p>Redirecting to <a href="dashboard.html">the dashboard</a>…</p>
+</body>
+</html>
