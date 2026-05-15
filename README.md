@@ -5,8 +5,8 @@ character data live from [D&D Beyond](https://www.dndbeyond.com), shows your
 whole party at a glance, and ships with a hidden dice-rolling system so the
 DM sees player rolls before the players do.
 
-![Dashboard overview](docs/screenshot-dashboard.png)
-![Expanded character card](docs/screenshot-dashboard1.png)
+![Dashboard overview](docs/screenshot-dashboard1.png)
+![Expanded character card](docs/screenshot-dashboard.png)
 
 ## Features
 
