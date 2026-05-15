@@ -6,6 +6,8 @@ whole party at a glance, and ships with a hidden dice-rolling system so the
 DM sees player rolls before the players do.
 
 ![Dashboard overview](docs/screenshot-dashboard.png)
+![Dashboard overview](docs/screenshot-dashboard3.png)
+![Dashboard overview](docs/screenshot-dashboard4.png)
 
 > _Screenshot placeholder — drop your own into `docs/screenshot-dashboard.png`._
 
