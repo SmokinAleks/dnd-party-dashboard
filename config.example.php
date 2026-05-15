@@ -70,8 +70,8 @@ return [
     // ── Support / donations ─────────────────────────────────────────────────
 
     /**
-     * Your Ko-fi username. If set, a small "Support on Ko-fi" button appears
-     * in the footer. Leave empty to hide the button entirely.
+     * Your Ko-fi username. If set, a "☕ Buy me a coffee" button appears in
+     * the top centre of the dashboard header. Leave empty to hide it entirely.
      * Example: 'yourname' → links to https://ko-fi.com/yourname
      */
     'kofi_username' => '',

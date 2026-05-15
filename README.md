@@ -4,7 +4,7 @@
 [![GitHub Repo stars](https://img.shields.io/github/stars/SmokinAleks/dnd-party-dashboard?style=social)](https://github.com/SmokinAleks/dnd-party-dashboard/stargazers)
 [![Last commit](https://img.shields.io/github/last-commit/SmokinAleks/dnd-party-dashboard)](https://github.com/SmokinAleks/dnd-party-dashboard/commits/main)
 [![Open issues](https://img.shields.io/github/issues/SmokinAleks/dnd-party-dashboard)](https://github.com/SmokinAleks/dnd-party-dashboard/issues)
-[![Ko-fi](https://img.shields.io/badge/Support-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/smokinaleks)
+[![Buy me a coffee](https://img.shields.io/badge/%E2%98%95-Buy%20me%20a%20coffee-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/smokinaleks)
 
 A self-hosted, browser-based party dashboard for tabletop D&D 5e games. Pulls
 character data live from [D&D Beyond](https://www.dndbeyond.com), shows your
